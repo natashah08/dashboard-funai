@@ -3,49 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Monitoramento Territorial - CGID/FUNAI</title>
+  <title>Dashboard de Processos - Finatec</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #f4f7f4;
-      --card: #ffffff;
-      --text: #1a2e1a;
-      --muted: #556b55;
-      --primary: #2d5a27; /* Verde Institucional */
-      --accent: #8b4513; /* Tom de Terra */
-      --danger: #b22222;
-      --border: #d1d9d1;
-      --accent-top: linear-gradient(90deg, #2d5a27, #8b4513);
+      --bg: linear-gradient(165deg, #faf9fc 0%, #f4f3f8 40%, #eeecf4 100%);
+      --card: #fdfcfd;
+      --text: #2c2247;
+      --muted: #5c5570;
+      --primary: #7b6d98;
+      --danger: #7a1d1d;
+      --border: #e4e1eb;
+      --panel-bg: rgba(253, 252, 253, 0.97);
+      --soft-bg: #f5f4f9;
+      --table-head: #eceaf2;
+      --table-odd: #faf9fc;
+      --table-hover: #ebe8f2;
+      --input-bg: #ffffff;
+      --chart-muted: #52466e;
+      --chart-grid: rgba(44, 34, 71, 0.08);
+      --bar-dim: #cbc4d9;
+      --accent-top: linear-gradient(90deg, #2c2247, #7b6d98);
+      --accent-top-mid: linear-gradient(90deg, #52466e, #a697c4);
     }
     body.dark-theme {
-      --bg: #121a12;
-      --card: #1c261c;
-      --text: #e8f0e8;
-      --muted: #a0b0a0;
-      --primary: #4ea946;
-      --border: #2d3a2d;
+      --bg: radial-gradient(ellipse 115% 75% at 50% -15%, #3d3558 0%, #2f2744 42%, #221b36 100%);
+      --card: #322b45;
+      --text: #f5f2fa;
+      --muted: #c9bddf;
+      --primary: #a697c4;
+      --danger: #ff6b6b;
+      --border: #4a4360;
+      --panel-bg: rgba(43, 38, 58, 0.98);
+      --soft-bg: #2e283d;
+      --table-head: #3f3754;
+      --table-odd: #2f293e;
+      --table-hover: #3e3652;
+      --input-bg: #383047;
+      --chart-muted: #d8cef0;
+      --chart-grid: rgba(229, 220, 245, 0.12);
+      --bar-dim: #595070;
+      --accent-top: linear-gradient(90deg, #2c2247, #52466e);
+      --accent-top-mid: linear-gradient(90deg, #52466e, #a697c4);
     }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-    .container { max-width: 1200px; margin: auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-    .title h1 { margin: 0; font-size: 24px; color: var(--primary); text-transform: uppercase; }
-    .controls { display: flex; flex-wrap: wrap; gap: 10px; background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; }
-    .controls label { font-size: 12px; font-weight: bold; color: var(--muted); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-    .card { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--accent-top); border-radius: 12px 12px 0 0; }
-    .metric { font-size: 32px; font-weight: 800; color: var(--primary); margin-top: 10px; }
-    .panel { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); }
-    .chart-container { height: 300px; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 15px; }
-    th { background: var(--primary); color: white; padding: 10px; text-align: left; }
-    td { padding: 10px; border-bottom: 1px solid var(--border); }
-    tr:hover { background: #f0f4f0; cursor: pointer; }
-    .btn { padding: 8px 15px; border-radius: 5px; cursor: pointer; border: 1px solid var(--primary); background: white; font-weight: bold; }
-    .btn-dark { background: var(--primary); color: white; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Inter", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1240px;
+      margin: 28px auto;
+      padding: 0 18px 28px;
+    }
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .title h1 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #2c2247, #52466e, #a697c4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .controls label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      box-shadow: 0 6px 18px rgba(44, 34, 71, 0.06);
+    }
+    body.dark-theme .controls label {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+    .controls select, .controls input {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-size: 12px;
+      min-width: 160px;
+      color: var(--text);
+      background: var(--input-bg);
+    }
+    .search-label input { min-width: 240px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 12px 0 18px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(44, 34, 71, 0.06);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: var(--accent-top-mid);
+    }
+    .card.blue::before { background: var(--accent-top); }
+    .card.orange::before { background: linear-gradient(90deg, #52466e, #7b6d98); }
+    .card.red::before { background: linear-gradient(90deg, #7b6d98, #a697c4); }
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .metric { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+    .metric-danger { color: #ff1f1f; }
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 28px rgba(44, 34, 71, 0.08);
+    }
+    .panel h2 { margin: 0 0 12px; font-size: 19px; }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .chart-box { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--soft-bg); }
+    .chart-canvas-wrap { height: 260px; width: 100%; position: relative; }
+    .table-wrap { margin-top: 14px; overflow: auto; max-height: 280px; border: 1px solid var(--border); border-radius: 8px; }
+    table { border-collapse: collapse; width: 100%; min-width: 860px; background: var(--card); }
+    th, td { padding: 10px 11px; border-bottom: 1px solid var(--border); font-size: 12px; text-align: left; }
+    th { background: var(--table-head); position: sticky; top: 0; z-index: 1; font-weight: 700; }
+    .clickable-row { cursor: pointer; }
+    .clickable-row:hover { background: var(--table-hover) !important; }
+    .details-panel { margin-top: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--soft-bg); padding: 12px; }
+    .details-item { margin-bottom: 10px; padding: 10px; border-left: 4px solid #7b6d98; border-radius: 8px; background: var(--card); font-size: 13px; }
+    .theme-btn, .clear-btn { border: 1px solid var(--border); background: var(--input-bg); color: var(--text); border-radius: 8px; padding: 7px 11px; font-size: 12px; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -53,151 +183,183 @@
     <div class="header">
       <div class="title">
         <h1>Painel de Gestão Territorial - CGID</h1>
-        <p style="color: var(--muted); margin: 5px 0;">Monitoramento de Prazos e Peças Técnicas</p>
+        <p>Monitoramento de Prazos e Peças Técnicas</p>
       </div>
-      <button id="themeToggleBtn" class="btn">🌙 Modo Escuro</button>
-    </div>
-
-    <div class="controls">
-      <div style="flex: 1; min-width: 200px;">
-        <label>IMPORTAR DADOS (EXCEL/CSV)</label><br>
-        <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" style="font-size: 12px; margin-top: 5px;" />
-      </div>
-      <div>
-        <label>FILTRAR ETAPA</label><br>
-        <select id="etapaFilter"><option value="">Todas as Etapas</option></select>
-      </div>
-      <div>
-        <label>STATUS PEÇA</label><br>
-        <select id="statusFilter"><option value="">Todos os Status</option></select>
+      <div class="controls">
+        <button id="themeToggleBtn" class="theme-btn">🌙 Modo escuro</button>
+        <label>Arquivo <input id="fileInput" type="file" accept=".csv,.xlsx,.xls" /></label>
+        <label>Etapa <select id="etapaFilter"><option value="">Todas</option></select></label>
+        <label>Status <select id="statusFilter"><option value="">Todos</option></select></label>
+        <label class="search-label">Buscar nome <input id="nomeFilter" type="text" placeholder="ID, terra, povo ou responsável" /></label>
+        <label>Tempo de Espera
+          <select id="tempoFilter">
+            <option value="">Todos</option>
+            <option value="0-30">0 a 30 dias</option>
+            <option value="31-90">31 a 90 dias</option>
+            <option value="91-180">91 a 180 dias</option>
+            <option value="181+">Acima de 180 dias</option>
+          </select>
+        </label>
+        <label>Grau de Conflito
+          <select id="conflitoFilter">
+            <option value="">Todos</option>
+            <option value="alto">Alto</option>
+            <option value="medio">Médio</option>
+            <option value="baixo">Baixo</option>
+          </select>
+        </label>
       </div>
     </div>
 
     <div class="grid">
-      <div class="card">
-        <h3>Total de Processos</h3>
-        <div id="totalProcessos" class="metric">0</div>
-      </div>
-      <div class="card">
-        <h3>Tempo Médio em Trâmite (Dias)</h3>
-        <div id="tempoMedio" class="metric">0</div>
-      </div>
-      <div class="card" style="border-left: 5px solid var(--danger);">
-        <h3 style="color: var(--danger);">Pendências Críticas</h3>
-        <div id="pendenciaCritica" class="metric" style="color: var(--danger);">0</div>
-      </div>
+      <div class="card blue"><h3>Total de Processos</h3><div id="totalProcessos" class="metric">0</div></div>
+      <div class="card orange"><h3>Tempo Médio em Trâmite (dias)</h3><div id="tempoMedio" class="metric">0</div></div>
+      <div class="card red"><h3>Processos com Pendência Crítica</h3><div id="pendenciaCritica" class="metric metric-danger">0</div></div>
     </div>
 
     <div class="panel">
-      <h2>Distribuição por Fase de Demarcação</h2>
-      <div class="chart-container">
-        <canvas id="funnelChart"></canvas>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Processos por fase</h2>
+        <button id="clearDrilldownBtn" class="clear-btn">Limpar seleção</button>
       </div>
-      
-      <div style="overflow-x: auto;">
-        <table id="processTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Terra Indígena</th>
-              <th>Povo</th>
-              <th>Etapa</th>
-              <th>Dias Parado</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
+      <div class="chart-grid">
+        <div class="chart-box"><h3>Fases</h3><div class="chart-canvas-wrap"><canvas id="funnelChart"></canvas></div></div>
+        <div class="chart-box"><h3>Status da peça técnica</h3><div class="chart-canvas-wrap"><canvas id="statusChart"></canvas></div></div>
+      </div>
+      <div id="status" style="font-size:12px; color:var(--muted); margin-top:10px;"></div>
+      <div class="table-wrap">
+        <table><thead><tr id="tableHead"></tr></thead><tbody id="tableBody"></tbody></table>
+      </div>
+      <div id="detailsPanel" class="details-panel">
+        <h3>Detalhes do processo</h3>
+        <div id="detailsContent">Selecione um arquivo para carregar os dados.</div>
       </div>
     </div>
   </div>
 
   <script>
-    let allRows = [];
     const fileInput = document.getElementById("fileInput");
-    
-    // Função para calcular dias de espera (Arredondado)
-    function calcularDias(dataRaw) {
-      if (!dataRaw) return 0;
-      let dataInicio;
-      if (typeof dataRaw === 'number') {
-        dataInicio = new Date((dataRaw - 25569) * 86400 * 1000);
-      } else {
-        const partes = dataRaw.split('/');
-        dataInicio = partes.length === 3 ? new Date(partes[2], partes[1]-1, partes[0]) : new Date(dataRaw);
-      }
-      if (isNaN(dataInicio)) return 0;
-      const hoje = new Date();
-      return Math.round((hoje - dataInicio) / (1000 * 60 * 60 * 24));
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const etapaFilter = document.getElementById("etapaFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const nomeFilter = document.getElementById("nomeFilter");
+    const tempoFilter = document.getElementById("tempoFilter");
+    const conflitoFilter = document.getElementById("conflitoFilter");
+    const totalProcessosEl = document.getElementById("totalProcessos");
+    const tempoMedioEl = document.getElementById("tempoMedio");
+    const pendenciaCriticaEl = document.getElementById("pendenciaCritica");
+    const tableBody = document.getElementById("tableBody");
+    const tableHead = document.getElementById("tableHead");
+    const detailsContent = document.getElementById("detailsContent");
+    const statusEl = document.getElementById("status");
+
+    let allRows = [];
+    let chart, statusChart, drilldownEtapa = "";
+
+    const normalize = (val) => String(val ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+    function parseDateBR(value) {
+      if (value instanceof Date) return value;
+      if (typeof value === "number") return new Date((value - 25569) * 86400 * 1000);
+      const text = String(value || "").trim();
+      const dmy = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      return dmy ? new Date(dmy[3], dmy[2] - 1, dmy[1]) : new Date(text);
     }
 
-    function renderDashboard(data) {
-      const total = data.length;
-      let somaDias = 0;
-      let pendencias = 0;
-      const tableBody = document.getElementById("tableBody");
-      tableBody.innerHTML = "";
+    function diasEmEspera(dateText) {
+      const d = parseDateBR(dateText);
+      if (!d || isNaN(d)) return null;
+      const hoje = new Date();
+      return Math.max(0, Math.floor((hoje - d) / (1000 * 60 * 60 * 24)));
+    }
 
-      const etapasCount = {};
+    function populateFilters(rows) {
+      const etapas = [...new Set(rows.map(r => r.etapaAtual).filter(Boolean))].sort();
+      const status = [...new Set(rows.map(r => r.statusPecaTecnica).filter(Boolean))].sort();
+      etapaFilter.innerHTML = '<option value="">Todas</option>' + etapas.map(e => `<option value="${e}">${e}</option>`).join("");
+      statusFilter.innerHTML = '<option value="">Todos</option>' + status.map(s => `<option value="${s}">${s}</option>`).join("");
+    }
 
-      data.forEach(r => {
-        const dias = calcularDias(r[4]);
-        somaDias += dias;
-        if (String(r[5]).toLowerCase().includes("pendente")) pendencias++;
-        
-        etapasCount[r[3]] = (etapasCount[r[3]] || 0) + 1;
+    function renderDashboard() {
+      const etapa = etapaFilter.value;
+      const statusF = statusFilter.value;
+      const nome = normalize(nomeFilter.value);
+      const tempo = tempoFilter.value;
 
-        tableBody.innerHTML += `<tr>
-          <td>${r[0]}</td>
-          <td>${r[1]}</td>
-          <td>${r[2]}</td>
-          <td>${r[3]}</td>
-          <td>${dias}</td>
-        </tr>`;
+      let filtered = allRows.filter(r => {
+        const okEtapa = !etapa || r.etapaAtual === etapa;
+        const okStatus = !statusF || r.statusPecaTecnica === statusF;
+        const searchTxt = normalize(`${r.idProcesso} ${r.terraIndigena} ${r.povo}`);
+        const okNome = !nome || searchTxt.includes(nome);
+        const dias = diasEmEspera(r.dataInicioEtapaAtual);
+        let okTempo = true;
+        if (tempo === "0-30") okTempo = dias <= 30;
+        else if (tempo === "31-90") okTempo = dias > 30 && dias <= 90;
+        else if (tempo === "91-180") okTempo = dias > 90 && dias <= 180;
+        else if (tempo === "181+") okTempo = dias > 180;
+        return okEtapa && okStatus && okNome && okTempo;
       });
 
-      document.getElementById("totalProcessos").textContent = total;
-      document.getElementById("tempoMedio").textContent = total > 0 ? Math.round(somaDias / total) : 0;
-      document.getElementById("pendenciaCritica").textContent = pendencias;
+      const displayRows = drilldownEtapa ? filtered.filter(r => r.etapaAtual === drilldownEtapa) : filtered;
 
-      renderChart(etapasCount);
+      totalProcessosEl.textContent = displayRows.length;
+      const listaDias = displayRows.map(r => diasEmEspera(r.dataInicioEtapaAtual)).filter(v => v !== null);
+      tempoMedioEl.textContent = listaDias.length ? Math.round(listaDias.reduce((a,b) => a+b, 0) / listaDias.length) : 0;
+      pendenciaCriticaEl.textContent = displayRows.filter(r => normalize(r.statusPecaTecnica).includes("pendente")).length;
+
+      renderFunnel(filtered);
+      renderStatusChart(displayRows);
+      renderTable(displayRows);
+      statusEl.textContent = `Total: ${allRows.length} | Filtrados: ${displayRows.length}`;
     }
 
-    let myChart;
-    function renderChart(etapasData) {
-      const ctx = document.getElementById('funnelChart').getContext('2d');
-      if (myChart) myChart.destroy();
-      myChart = new Chart(ctx, {
+    function renderFunnel(rows) {
+      const counts = rows.reduce((acc, r) => { acc[r.etapaAtual] = (acc[r.etapaAtual] || 0) + 1; return acc; }, {});
+      const labels = Object.keys(counts);
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById("funnelChart"), {
         type: 'bar',
-        data: {
-          labels: Object.keys(etapasData),
-          datasets: [{
-            label: 'Qtd de Processos',
-            data: Object.values(etapasData),
-            backgroundColor: '#2d5a27'
-          }]
-        },
+        data: { labels, datasets: [{ label: 'Processos', data: labels.map(l => counts[l]), backgroundColor: '#7b6d98' }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, onClick: (e, elements) => {
+          if (elements.length > 0) { drilldownEtapa = labels[elements[0].index]; renderDashboard(); }
+        }}
+      });
+    }
+
+    function renderStatusChart(rows) {
+      const counts = rows.reduce((acc, r) => { acc[r.statusPecaTecnica] = (acc[r.statusPecaTecnica] || 0) + 1; return acc; }, {});
+      const labels = Object.keys(counts);
+      if (statusChart) statusChart.destroy();
+      statusChart = new Chart(document.getElementById("statusChart"), {
+        type: 'pie',
+        data: { labels, datasets: [{ data: labels.map(l => counts[l]), backgroundColor: ['#2c2247', '#7b6d98', '#a697c4'] }] },
         options: { responsive: true, maintainAspectRatio: false }
       });
     }
 
-    fileInput.addEventListener("change", (e) => {
+    function renderTable(rows) {
+      const headers = ["ID", "Terra Indígena", "Povo", "Etapa", "Início", "Status"];
+      tableHead.innerHTML = headers.map(h => `<th>${h}</th>`).join("");
+      tableBody.innerHTML = rows.map(r => `<tr class="clickable-row"><td>${r.idProcesso}</td><td>${r.terraIndigena}</td><td>${r.povo}</td><td>${r.etapaAtual}</td><td>${r.dataInicioEtapaAtual}</td><td>${r.statusPecaTecnica}</td></tr>`).join("");
+    }
+
+    fileInput.addEventListener("change", async (e) => {
       const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const bstr = evt.target.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws, { header: 1 }).slice(1);
-        allRows = data.filter(r => r.length > 0);
-        renderDashboard(allRows);
-      };
-      reader.readAsBinaryString(file);
+      if (!file) return;
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "array" });
+      const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+      allRows = data.slice(1).map(r => ({
+        idProcesso: r[0], terraIndigena: r[1], povo: r[2], etapaAtual: r[3], dataInicioEtapaAtual: r[4], statusPecaTecnica: r[5]
+      }));
+      populateFilters(allRows);
+      renderDashboard();
     });
 
-    document.getElementById("themeToggleBtn").addEventListener("click", () => {
-      document.body.classList.toggle("dark-theme");
-    });
+    [etapaFilter, statusFilter, nomeFilter, tempoFilter, conflitoFilter].forEach(el => el.addEventListener("change", renderDashboard));
+    nomeFilter.addEventListener("input", renderDashboard);
+    themeToggleBtn.addEventListener("click", () => document.body.classList.toggle("dark-theme"));
+    document.getElementById("clearDrilldownBtn").addEventListener("click", () => { drilldownEtapa = ""; renderDashboard(); });
   </script>
 </body>
 </html>
